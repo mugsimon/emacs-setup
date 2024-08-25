@@ -74,9 +74,14 @@ if [ "$ACTION" == "install" ]; then
     fi
 
     # Create .emacs.d directory and copy init.el
-    mkdir -p "$HOME/.emacs.d"
-    cp .emacs.d/init.el "$HOME/.emacs.d/init.el"
-    echo "Copied init.el to $HOME/.emacs.d/init.el"
+    # mkdir -p "$HOME/.emacs.d"
+    # cp .emacs.d/init.el "$HOME/.emacs.d/init.el"
+    # echo "Copied init.el to $HOME/.emacs.d/init.el"
+
+    # Copy .emacs.d directory
+    cp -r .emacs.d "$HOME"
+    echo "Copied .emacs.d to $HOME"
+
 elif [ "$ACTION" == "update" ]; then
     # Overwrite existing init.el
     if [ -f "$HOME/.emacs.d/init.el" ]; then
