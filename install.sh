@@ -1,48 +1,88 @@
 #!/bin/bash
 
-# update .emacs.d
+# Function to display help
+usage() {
+    echo "Usage: $0 [-i | -u]"
+    echo "  -i  Create a new .emacs.d directory and copy init.el"
+    echo "  -u  Overwrite existing init.el with the new one"
+    exit 1
+}
+
+# Parse options
+while getopts "iu" opt; do
+    case $opt in
+        i)
+            ACTION="install"
+            ;;
+        u)
+            ACTION="update"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Check if no options are provided
+if [ -z "$ACTION" ]; then
+    usage
+fi
+
+# Update .emacs.d submodule
 git submodule update
 
-# install Emacs
-sudo snap install emacs --classic
+# Handle actions
+if [ "$ACTION" == "install" ]; then
+    # Install Emacs
+    sudo snap install emacs --classic
 
-# update system package list
-sudo apt update
+    # Update system package list
+    sudo apt update
 
-# install Emacs Mozc (for Japanese user)
-sudo apt install emacs-mozc-bin
+    # Install Emacs Mozc (for Japanese user)
+    sudo apt install emacs-mozc-bin
 
-# Use C-space for mark set in Emacs
-CONFIG_LINE="Emacs*UseXIM: false"
-# Path to .Xresources
-XRESOURCES_FILE="$HOME/.Xresources"
-# Check file existance
-if [ -f "$XRESOURCES_FILE" ]; then
-    # Check config line 
-    if ! grep -Fxq "$CONFIG_LINE" "$XRESOURCES_FILE"; then
-        # Add config line if not exist
-        echo "$CONFIG_LINE" >> "$XRESOURCES_FILE"
-        echo "Add setting: $CONFIG_LINE"
+    # Use C-space for mark set in Emacs
+    CONFIG_LINE="Emacs*UseXIM: false"
+    # Path to .Xresources
+    XRESOURCES_FILE="$HOME/.Xresources"
+    # Check file existence
+    if [ -f "$XRESOURCES_FILE" ]; then
+        # Check config line 
+        if ! grep -Fxq "$CONFIG_LINE" "$XRESOURCES_FILE"; then
+            # Add config line if not exist
+            echo "$CONFIG_LINE" >> "$XRESOURCES_FILE"
+            echo "Added setting: $CONFIG_LINE"
+        else
+            echo "Setting already exists."
+        fi
     else
-        echo "Setting already exist."
+        # Create .Xresources
+        echo "$CONFIG_LINE" > "$XRESOURCES_FILE"
+        echo ".Xresources created and setting added."
     fi
-else
-    # make .Xresources
-    echo "$CONFIG_LINE" > "$XRESOURCES_FILE"
-    echo ".Xresources made file, added setting."
-fi
 
-# Make backup if .emacs.d already exists
-if [ -d "$HOME/.emacs.d" ]; then
-    echo "Found .emacs.d, making backup..."
-    BACKUP_DIR="$HOME/backup"
-    # Create backup directory if it doesn't exist
-    mkdir -p "$BACKUP_DIR"
-    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-    mv "$HOME/.emacs.d" "$BACKUP_DIR/.emacs.d_$TIMESTAMP"
-    echo ".emacs.d backed up to $BACKUP_DIR/.emacs.d_$TIMESTAMP"
-fi
+    # Make backup if .emacs.d already exists
+    if [ -d "$HOME/.emacs.d" ]; then
+        echo "Found .emacs.d, making backup..."
+        BACKUP_DIR="$HOME/backup"
+        # Create backup directory if it doesn't exist
+        mkdir -p "$BACKUP_DIR"
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        mv "$HOME/.emacs.d" "$BACKUP_DIR/.emacs.d_$TIMESTAMP"
+        echo ".emacs.d backed up to $BACKUP_DIR/.emacs.d_$TIMESTAMP"
+    fi
 
-# Copy .emacs.d directory
-cp -r .emacs.d "$HOME/.emacs.d"
-echo ".emacs.d copied to $HOME/.emacs.d"
+    # Create .emacs.d directory and copy init.el
+    mkdir -p "$HOME/.emacs.d"
+    cp .emacs.d/init.el "$HOME/.emacs.d/init.el"
+    echo "Copied init.el to $HOME/.emacs.d/init.el"
+elif [ "$ACTION" == "update" ]; then
+    # Overwrite existing init.el
+    if [ -f "$HOME/.emacs.d/init.el" ]; then
+        cp .emacs.d/init.el "$HOME/.emacs.d/init.el"
+        echo "Overwritten init.el at $HOME/.emacs.d/init.el"
+    else
+        echo "No existing init.el found. Use -i to install it."
+    fi
+fi
