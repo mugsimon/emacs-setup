@@ -42,6 +42,9 @@ if [ "$ACTION" == "install" ]; then
     # Install Emacs Mozc (for Japanese user)
     sudo apt install emacs-mozc-bin
 
+    # Install markdown
+    sudo apt-get install markdown
+
     # Use C-space for mark set in Emacs
     CONFIG_LINE="Emacs*UseXIM: false"
     # Path to .Xresources
