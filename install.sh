@@ -45,6 +45,12 @@ if [ "$ACTION" == "install" ]; then
     # Install markdown
     sudo apt-get install markdown
 
+    # Install c/c++ completion dependencies
+    sudo apt install clang
+    sudo apt install cmake
+    sudo apt install libclang-dev
+    sudo apt install llvm-dev
+
     # Use C-space for mark set in Emacs
     CONFIG_LINE="Emacs*UseXIM: false"
     # Path to .Xresources
